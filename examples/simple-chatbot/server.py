@@ -17,6 +17,11 @@ from fastapi.responses import JSONResponse, RedirectResponse
 
 from pipecat.transports.services.helpers.daily_rest import DailyRESTHelper, DailyRoomParams
 
+
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
+
 MAX_BOTS_PER_ROOM = 1
 
 # Bot sub-process dict for status reporting and concurrency control
@@ -86,7 +91,8 @@ async def start_agent(request: Request):
     try:
         proc = subprocess.Popen(
             [
-                f"python3 -m bot -u {room.url} -t {token}"
+                # f"python3 -m bot -u {room.url} -t {token}"
+                f"python3 -m bot_refine -u {room.url} -t {token}"
             ],
             shell=True,
             bufsize=1,

@@ -2,3 +2,5 @@ python-dotenv
 fastapi[all]
 uvicorn
 pipecat-ai[daily,openai,silero]
+pydub==0.25.1
+silero_vad==5.1

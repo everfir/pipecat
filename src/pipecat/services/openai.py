@@ -69,6 +69,7 @@ class BaseOpenAILLMService(LLMService):
     """
 
     def __init__(self, *, model: str, api_key=None, base_url=None, **kwargs):
+        logger.info(">>>BaseOpenAILLMService.__init__")
         super().__init__(**kwargs)
         self._model: str = model
         self._client = self.create_client(api_key=api_key, base_url=base_url, **kwargs)
@@ -90,6 +91,7 @@ class BaseOpenAILLMService(LLMService):
             self,
             context: OpenAILLMContext,
             messages: List[ChatCompletionMessageParam]) -> AsyncStream[ChatCompletionChunk]:
+        logger.info(">>>BaseOpenAILLMService.get_chat_completions")
         chunks = await self._client.chat.completions.create(
             model=self._model,
             stream=True,
@@ -133,7 +135,9 @@ class BaseOpenAILLMService(LLMService):
             await self._stream_chat_completions(context)
         )
 
+        logger.info(">>> before async for")
         async for chunk in chunk_stream:
+            logger.info(">>> after async for")
             if chunk.usage:
                 tokens = {
                     "processor": self.name,

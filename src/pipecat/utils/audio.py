@@ -7,6 +7,8 @@
 import audioop
 import numpy as np
 import pyloudnorm as pyln
+from typing import List
+from pydub import AudioSegment
 
 
 def normalize_value(value, min_value, max_value):
@@ -52,3 +54,36 @@ def pcm_to_ulaw(pcm_bytes: bytes, in_sample_rate: int, out_sample_rate: int):
     ulaw_bytes = audioop.lin2ulaw(in_pcm_bytes, 2)
 
     return ulaw_bytes
+
+
+def load_audioseg_from_pcm(path: str, sample_rate: int=24000, channels: int=1, bit_depth: int=16):
+    with open(path, "rb") as fp:
+        data = fp.read()
+
+    # 将PCM数据转换为WAV
+    audio = AudioSegment(
+        data=data,
+        sample_width=bit_depth // 8,  # 位深转换为字节宽度
+        frame_rate=sample_rate,
+        channels=channels
+    )
+
+    return audio
+
+
+def merge_pcm_list_into_mp3(pcm_segs: List[str], mp3_path: str, sample_rate: int=24000, channels: int=1, bit_depth: int=16):
+    audio_full = None
+    for pcm_seg in pcm_segs:
+        audio_seg = load_audioseg_from_pcm(pcm_seg, sample_rate, channels, bit_depth)
+        if not audio_full:
+            audio_full = audio_seg
+        else:
+            audio_full += audio_seg
+
+    return audio_full.export(mp3_path, format="mp3", parameters=["-ar", "44100"], bitrate="128k")
+
+
+def change_audio_samplerate(src_path: str, dst_path: str, dst_samplerate: int):
+    audio = AudioSegment.from_file(src_path)
+    audio = audio.set_frame_rate(dst_samplerate)
+    audio.export(dst_path, format="mp3")
